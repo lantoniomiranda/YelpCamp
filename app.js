@@ -44,7 +44,6 @@ app.post('/campgrounds', catchAsync(async (req, res, next) => {
     res.redirect(`/campgrounds/${campground._id}`)
 }))
 
-
 app.get('/campgrounds/:id', catchAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/show', { campground });
@@ -67,8 +66,14 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     res.redirect('/campgrounds');
 }))
 
+app.all('*', (req, res, next) => {
+    next(new ExpressError('Page Not Found', 404));
+})
+
 app.use((err, req, res, next) => {
-    res.send('Oh boy, something went wrong!')
+    const { status = 500 } = err;
+    if (!err.message) err.message = 'Oops! Something Went Wrong!';
+    res.status(status).render('error', { err })
 })
 
 app.listen(3000, () => {
